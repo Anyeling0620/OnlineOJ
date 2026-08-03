@@ -15,7 +15,61 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/problems": {
+        "/problems/details": {
+            "get": {
+                "tags": [
+                    "公共方法"
+                ],
+                "summary": "问题详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "问题唯一id",
+                        "name": "problem_identity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回问题详情",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/problems/lists": {
             "get": {
                 "tags": [
                     "公共方法"
@@ -38,6 +92,144 @@ const docTemplate = `{
                         "type": "string",
                         "description": "模糊搜索关键词",
                         "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分类唯一id",
+                        "name": "category_identity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回列表数据",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/submit/lists": {
+            "get": {
+                "tags": [
+                    "公共方法"
+                ],
+                "summary": "问题列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "请输入页数，默认为1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "请输入每页结果个数，默认为20",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "问题唯一id",
+                        "name": "problem_identity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户唯一id",
+                        "name": "user_identity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回列表数据",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/details": {
+            "get": {
+                "tags": [
+                    "公共方法"
+                ],
+                "summary": "用户详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户唯一id",
+                        "name": "identity",
                         "in": "query"
                     }
                 ],
@@ -93,7 +285,7 @@ const docTemplate = `{
                 "data": {},
                 "message": {
                     "type": "string",
-                    "example": "fail"
+                    "example": "something went wrong"
                 }
             }
         },
