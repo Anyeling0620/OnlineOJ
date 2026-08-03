@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type ProblemBasic struct {
 	gorm.Model
@@ -15,4 +17,8 @@ type ProblemBasic struct {
 
 func (problemBasic *ProblemBasic) TableName() string {
 	return "problem_basic"
+}
+
+func GetProblemList(keyword string) *gorm.DB {
+	return DB.Model(new(ProblemBasic)).Where("title like ? OR content like ? ", "%"+keyword+"%", "%"+keyword+"%")
 }

@@ -2,12 +2,12 @@ package models
 
 import "gorm.io/gorm"
 
-type Category struct {
+type CategoryBasic struct {
 	gorm.Model
 	Name     string `json:"name"`
 	ParentId int    `json:"parent_id"`
 }
 
-func (category *Category) TableName() string {
-	return "category"
+func (category *CategoryBasic) TableName() string {
+	return "category_basic"
 }
