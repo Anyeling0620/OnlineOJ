@@ -29,6 +29,8 @@ definitions:
     type: object
 info:
   contact: {}
+  title: "OnlineOJ"
+  version: "v1"
 paths:
   /problems/details:
     get:
