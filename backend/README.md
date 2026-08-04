@@ -71,3 +71,16 @@ go get github.com/dgrijalva/jwt-go
 ```shell
 go get github.com/jordan-wright/email
 ```
+### 安装uuid
+```shell
+go get github.com/satori/go.uuid
+```
+
+### 安装redis(在此之前先在本机安装redis服务)
+```shell
+go get github.com/go-redis/redis/v8
+```
+## 检查redis是否运行中
+```cmd
+sc query Redis
+```

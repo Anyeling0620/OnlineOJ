@@ -160,15 +160,15 @@ paths:
           description: 服务器内部错误
           schema:
             $ref: '#/definitions/service.FailResponse'
-      summary: 问题列表
+      summary: 提交列表
       tags:
       - 公共方法
   /users/code:
     post:
       parameters:
-      - description: email
+      - description: mail
         in: formData
-        name: email
+        name: mail
         required: true
         type: string
       responses:
@@ -271,6 +271,61 @@ paths:
           schema:
             $ref: '#/definitions/service.FailResponse'
       summary: 用户登录
+      tags:
+      - 公共方法
+  /users/register:
+    post:
+      parameters:
+      - description: name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: phone
+        in: formData
+        name: phone
+        type: string
+      - description: mail
+        in: formData
+        name: mail
+        required: true
+        type: string
+      - description: code
+        in: formData
+        name: code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功返回列表数据
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 用户注册
       tags:
       - 公共方法
 swagger: "2.0"

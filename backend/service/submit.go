@@ -11,7 +11,7 @@ import (
 
 // GetSubmitList
 // @Tags 公共方法
-// @Summary 问题列表
+// @Summary 提交列表
 // @Param page query int false "请输入页数，默认为1"
 // @Param size query int false "请输入每页结果个数，默认为20"
 // @Param problem_identity query string false "问题唯一id"

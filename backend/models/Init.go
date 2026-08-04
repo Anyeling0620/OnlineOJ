@@ -1,8 +1,10 @@
 package models
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,6 +13,10 @@ import (
 )
 
 var DB, SqlDB = Init()
+
+var ctx = context.Background()
+
+var RDB = InitRedisDB()
 
 func Init() (*gorm.DB, *sql.DB) {
 
@@ -34,4 +40,12 @@ func Init() (*gorm.DB, *sql.DB) {
 
 	sqlDB, _ := db.DB()
 	return db, sqlDB
+}
+
+func InitRedisDB() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_URL"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
+	})
 }
