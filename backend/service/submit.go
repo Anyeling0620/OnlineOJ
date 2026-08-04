@@ -23,7 +23,7 @@ import (
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /submit/lists [get] {}
+// @Router /submit/list [get] {}
 func GetSubmitList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
 	if err != nil {

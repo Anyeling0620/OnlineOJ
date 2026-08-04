@@ -24,7 +24,7 @@ import (
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /users/details [get] {}
+// @Router /users/detail [get] {}
 func GetUserDetail(c *gin.Context) {
 	identity := c.Query("identity")
 	if identity == "" {

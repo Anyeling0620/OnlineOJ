@@ -26,7 +26,7 @@ import (
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /problems/lists [get] {}
+// @Router /problems/list [get] {}
 func GetProblemList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
 	if err != nil {
@@ -85,7 +85,7 @@ func GetProblemList(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /problems/details [get] {}
+// @Router /problems/detail [get] {}
 func GetProblemDetail(c *gin.Context) {
 	identity := c.Query("problem_identity")
 	if identity == "" {
