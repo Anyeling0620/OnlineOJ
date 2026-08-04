@@ -66,3 +66,8 @@ r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 ```shell
 go get github.com/dgrijalva/jwt-go
 ``` 
+
+### 安装email服务
+```shell
+go get github.com/jordan-wright/email
+```
