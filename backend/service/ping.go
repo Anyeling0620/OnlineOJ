@@ -20,9 +20,8 @@ type ListData struct {
 
 // FailResponse 失败响应
 type FailResponse struct {
-	Code    int         `json:"code" example:"-1"`
-	Data    interface{} `json:"data"`
-	Message string      `json:"message" example:"something went wrong"`
+	Code    int    `json:"code" example:"-1"`
+	Message string `json:"message" example:"something went wrong"`
 }
 
 func Ping(c *gin.Context) {

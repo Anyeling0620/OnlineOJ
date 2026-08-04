@@ -15,6 +15,7 @@ type ProblemBasic struct {
 	MaxMem     int    `json:"max_mem"`
 
 	ProblemCategories []*ProblemCategory `gorm:"foreignKey:ProblemId;references:ID" json:"problem_categories"`
+	TestCaseBasics    []*TestCaseBasic   `gorm:"foreignKey:ProblemIdentity;references:Identity" json:"test_cases"`
 }
 
 func (problemBasic *ProblemBasic) TableName() string {

@@ -1,10 +1,12 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Anyeling0620/OnlineOJ/backend/define"
 	"github.com/Anyeling0620/OnlineOJ/backend/models"
+	"github.com/Anyeling0620/OnlineOJ/backend/util"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -112,6 +114,123 @@ func GetProblemDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"data":    data,
+		"message": "success",
+	})
+}
+
+// ProblemCreate
+// @Tags 管理员私有方法
+// @Summary 问题创建
+// @Param Authorization header string true "Authorization"
+// @Param title formData string true "标题"
+// @Param content formData string true "内容"
+// @Param max_runtime formData string true "最大运行时间(s)"
+// @Param max_mem formData string true "最大运行内存(kb)"
+// @Param category_ids formData []int false "分类ID数组" collectionFormat(multi)
+// @Param test_cases formData []string true "测试样例数组" collectionFormat(multi)
+// @Success 200 {object} SuccessResponse "成功返回问题详情"
+// @Failure 400 {object} FailResponse "请求参数错误"
+// @Failure 401 {object} FailResponse "未授权"
+// @Failure 403 {object} FailResponse "权限不足"
+// @Failure 404 {object} FailResponse "资源不存在"
+// @Failure 500 {object} FailResponse "服务器内部错误"
+// @Router /problems [post] {}
+func ProblemCreate(c *gin.Context) {
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+	maxRuntime, _ := strconv.Atoi(c.PostForm("max_runtime"))
+	maxMem, _ := strconv.Atoi(c.PostForm("max_mem"))
+	categoryIds := c.PostFormArray("category_ids")
+	testCases := c.PostFormArray("test_cases")
+	if title == "" || content == "" || len(categoryIds) <= 0 || len(testCases) <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数不能为空",
+		})
+		return
+	}
+	identity := util.GetUUID()
+	data := &models.ProblemBasic{
+		Title:      title,
+		Identity:   identity,
+		Content:    content,
+		MaxRuntime: maxRuntime,
+		MaxMem:     maxMem,
+	}
+	// 创建问题的分类
+	categoryBasics := make([]*models.ProblemCategory, 0)
+	for _, categoryId := range categoryIds {
+		intCategoryId, err := strconv.Atoi(categoryId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "category id convert error",
+			})
+			return
+		}
+		if intCategoryId <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "分类ID不能为负数",
+			})
+		}
+		categoryBasics = append(categoryBasics, &models.ProblemCategory{
+			ProblemID:  data.ID,
+			CategoryID: uint(intCategoryId),
+		})
+	}
+	data.ProblemCategories = categoryBasics
+	// 创建问题的测试用例
+	testCasesBasics := make([]*models.TestCaseBasic, 0)
+	for _, testCase := range testCases {
+		// case : {"input":"1 2\n", "output": "3\n"}
+		caseMap := make(map[string]string)
+		err := json.Unmarshal([]byte(testCase), &caseMap)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "测试样例格式错误",
+			})
+			return
+		}
+		if _, ok := caseMap["input"]; !ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "测试样例输入格式错误",
+			})
+			return
+		}
+		if _, ok := caseMap["output"]; !ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "测试样例输出格式错误",
+			})
+			return
+		}
+
+		testCaseBasic := &models.TestCaseBasic{
+			Identity:        util.GetUUID(),
+			ProblemIdentity: identity,
+			Input:           caseMap["input"],
+			Output:          caseMap["output"],
+		}
+		testCasesBasics = append(testCasesBasics, testCaseBasic)
+	}
+	data.TestCaseBasics = testCasesBasics
+
+	err := models.DB.Create(data).Error
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "问题创建失败",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
+		"data": gin.H{
+			"list": data,
+		},
 		"message": "success",
 	})
 }

@@ -1,6 +1,6 @@
 package models
 
-type TestCase struct {
+type TestCaseBasic struct {
 	BaseModel
 	Identity        string `json:"identity"`
 	ProblemIdentity string `json:"problem-identity"`
@@ -8,6 +8,6 @@ type TestCase struct {
 	Output          string `json:"output"`
 }
 
-func (table *TestCase) TableName() string {
-	return "test_case"
+func (table *TestCaseBasic) TableName() string {
+	return "test_case_basic"
 }

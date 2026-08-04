@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -8,19 +9,20 @@ import (
 type UserClaims struct {
 	Name     string `json:"name"`
 	Identity string `json:"identity"`
+	IsAdmin  int    `json:"is_admin"`
 	jwt.StandardClaims
 }
 
 var key = []byte("1145141919810")
 
 // GenerateToken 生成token
-func GenerateToken(identity, name string) (string, error) {
-	UserClaim := &UserClaims{
-		"test",
-		"e47c08df-284e-4473-b16c-70f2f56ac3f9",
-		jwt.StandardClaims{},
+func GenerateToken(identity, name string, isAdmin int) (string, error) {
+	userClaim := &UserClaims{
+		Name:     name,
+		Identity: identity,
+		IsAdmin:  isAdmin,
 	}
-	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaim)
+	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, userClaim)
 	signedToken, err := unsignedToken.SignedString([]byte(key))
 	if err != nil {
 		fmt.Println(err)
@@ -34,6 +36,9 @@ func GenerateToken(identity, name string) (string, error) {
 func AnalyseToken(signedToken string) (*UserClaims, error) {
 	userClaim := &UserClaims{}
 	token, err := jwt.ParseWithClaims(signedToken, userClaim, func(token *jwt.Token) (interface{}, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("unexpected signing method: %s", token.Method.Alg())
+		}
 		return key, nil
 	})
 	if err != nil {
@@ -42,7 +47,7 @@ func AnalyseToken(signedToken string) (*UserClaims, error) {
 	}
 	if !token.Valid {
 		fmt.Println("token is not valid")
-		return nil, err
+		return nil, errors.New("token is not valid")
 	}
 	return userClaim, nil
 }

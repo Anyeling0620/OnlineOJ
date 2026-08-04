@@ -9,6 +9,7 @@ type UserBasic struct {
 	Mail      string `json:"mail"`
 	PassNum   int    `json:"pass_num"`
 	SubmitNum int    `json:"submit_num"`
+	IsAdmin   int    `json:"is_admin"` // 0-非管理员 1-管理员
 }
 
 func (userBasic *UserBasic) TableName() string {
