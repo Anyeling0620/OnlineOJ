@@ -61,3 +61,8 @@ r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 ### 利用swagger检查端口和测试
 > go swagger
 #### 访问 ```http://localhost:8080/swagger/index.html```
+
+### 安装jwt
+```shell
+go get github.com/dgrijalva/jwt-go
+``` 

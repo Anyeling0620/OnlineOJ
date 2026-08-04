@@ -29,8 +29,6 @@ definitions:
     type: object
 info:
   contact: {}
-  title: "OnlineOJ"
-  version: "v1"
 paths:
   /problems/details:
     get:
@@ -198,6 +196,45 @@ paths:
           schema:
             $ref: '#/definitions/service.FailResponse'
       summary: 用户详情
+      tags:
+      - 公共方法
+  /users/login:
+    post:
+      parameters:
+      - description: 用户昵称
+        in: formData
+        name: username
+        type: string
+      - description: 用户密码
+        in: formData
+        name: password
+        type: string
+      responses:
+        "200":
+          description: 成功返回列表数据
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 用户登录
       tags:
       - 公共方法
 swagger: "2.0"
