@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type CategoryBasic struct {
-	gorm.Model
+	BaseModel
 	Name              string             `json:"name"`
 	ParentId          int                `json:"parent_id"`
 	ProblemCategories []*ProblemCategory `gorm:"foreignKey:CategoryId;references:ID" json:"problem_categories"`

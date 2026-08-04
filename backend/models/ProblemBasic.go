@@ -5,7 +5,7 @@ import (
 )
 
 type ProblemBasic struct {
-	gorm.Model
+	BaseModel
 	Identity   string `json:"identity"`
 	Title      string `json:"title"`
 	Content    string `json:"content"`

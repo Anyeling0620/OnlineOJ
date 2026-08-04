@@ -1,9 +1,7 @@
 package models
 
-import "gorm.io/gorm"
-
 type ProblemCategory struct {
-	gorm.Model
+	BaseModel
 	ProblemID  int `json:"problem_id"`
 	CategoryID int `json:"category_id"`
 
