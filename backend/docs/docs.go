@@ -388,6 +388,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/rank": {
+            "get": {
+                "tags": [
+                    "公共方法"
+                ],
+                "summary": "用户排行榜",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "请输入页数，默认为1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "请输入每页结果个数，默认为20",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回列表数据",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/register": {
             "post": {
                 "tags": [

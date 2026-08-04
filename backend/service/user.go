@@ -3,12 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/Anyeling0620/OnlineOJ/backend/define"
 	"github.com/Anyeling0620/OnlineOJ/backend/models"
 	"github.com/Anyeling0620/OnlineOJ/backend/util"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -129,9 +131,26 @@ func SendCode(c *gin.Context) {
 		return
 	}
 
+	var cnt int64
+	err := models.DB.Where("mail=?", mail).Model(&models.UserBasic{}).Count(&cnt).Error
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "get userinfo error",
+		})
+		return
+	}
+	if cnt > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "该邮箱已被注册",
+		})
+		return
+	}
+
 	code := util.GetRand()
 	models.RDB.Set(c, mail, code, time.Second*60)
-	err := util.SendCode(mail, code)
+	err = util.SendCode(mail, code)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{
 			"code":    http.StatusBadGateway,
@@ -264,6 +283,60 @@ func Register(c *gin.Context) {
 		"code": http.StatusOK,
 		"data": gin.H{
 			"token": token,
+		},
+		"message": "success",
+	})
+}
+
+// GetRankList
+// @Tags 公共方法
+// @Summary 用户排行榜
+// @Param page query int false "请输入页数，默认为1"
+// @Param size query int false "请输入每页结果个数，默认为20"
+// @Success 200 {object} SuccessResponse "成功返回列表数据"
+// @Failure 400 {object} FailResponse "请求参数错误"
+// @Failure 401 {object} FailResponse "未授权"
+// @Failure 403 {object} FailResponse "权限不足"
+// @Failure 404 {object} FailResponse "资源不存在"
+// @Failure 500 {object} FailResponse "服务器内部错误"
+// @Router /users/rank [get] {}
+func GetRankList(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
+	if err != nil {
+		fmt.Println("page conv error:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"message": "page convert error",
+		})
+		return
+	}
+	size, err := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
+	if err != nil {
+		fmt.Println("size conv error:", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"message": "size convert error",
+		})
+		return
+	}
+
+	offset := (page - 1) * size
+	list := make([]models.UserBasic, 0)
+	var count int64
+
+	err = models.DB.Model(&models.UserBasic{}).Count(&count).Order("pass_num desc, submit_num asc").Offset(offset).Limit(size).Find(&list).Find(&list).Error
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "get user rank list error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
+		"data": gin.H{
+			"count": count,
+			"list":  list,
 		},
 		"message": "success",
 	})
