@@ -9,6 +9,7 @@ backend/pkg/
 backend/*.exe
 backend/*.test
 backend/vendor/
+backend/code/
 
 # === 前端 ===
 frontend/node_modules/

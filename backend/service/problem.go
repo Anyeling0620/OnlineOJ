@@ -124,7 +124,7 @@ func GetProblemDetail(c *gin.Context) {
 // @Param Authorization header string true "Authorization"
 // @Param title formData string true "标题"
 // @Param content formData string true "内容"
-// @Param max_runtime formData string true "最大运行时间(s)"
+// @Param max_runtime formData string true "最大运行时间(ms)"
 // @Param max_mem formData string true "最大运行内存(kb)"
 // @Param category_ids formData []int false "分类ID数组" collectionFormat(multi)
 // @Param test_cases formData []string true "测试样例数组" collectionFormat(multi)
@@ -242,7 +242,7 @@ func ProblemCreate(c *gin.Context) {
 // @Param identity formData string true "identity"
 // @Param title formData string true "标题"
 // @Param content formData string true "内容"
-// @Param max_runtime formData string true "最大运行时间(s)"
+// @Param max_runtime formData string true "最大运行时间(ms)"
 // @Param max_mem formData string true "最大运行内存(kb)"
 // @Param category_ids formData []int false "分类ID数组" collectionFormat(multi)
 // @Param test_cases formData []string true "测试样例数组" collectionFormat(multi)

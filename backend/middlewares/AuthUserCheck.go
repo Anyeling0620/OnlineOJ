@@ -48,7 +48,7 @@ func AuthUserCheck() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Next()
 		c.Set("user", userClaim)
+		c.Next()
 	}
 }

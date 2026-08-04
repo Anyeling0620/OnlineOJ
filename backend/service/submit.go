@@ -1,14 +1,22 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Anyeling0620/OnlineOJ/backend/define"
 	"github.com/Anyeling0620/OnlineOJ/backend/models"
 	"github.com/Anyeling0620/OnlineOJ/backend/util"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os/exec"
+	"runtime"
 	"strconv"
+	"sync"
+	"time"
 )
 
 // GetSubmitList
@@ -105,7 +113,7 @@ func GetSubmitList(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/problems [post] {}
+// @Router /user/submit [post] {}
 func Submit(c *gin.Context) {
 	problemIdentity := c.DefaultQuery("problem_identity", "")
 	code, err := ioutil.ReadAll(c.Request.Body)
@@ -124,11 +132,150 @@ func Submit(c *gin.Context) {
 			"code":    http.StatusBadGateway,
 			"message": "代码保存失败: " + err.Error(),
 		})
+		return
 	}
 
 	// 代码提交
-	//sb := &models.SubmitBasic{
-	//	Identity:        util.GetUUID(),
-	//	ProblemIdentity: problemIdentity,
-	//}
+	u, _ := c.Get("user")
+	userClaim := u.(*util.UserClaims)
+	sb := &models.SubmitBasic{
+		Identity:        util.GetUUID(),
+		ProblemIdentity: problemIdentity,
+		UserIdentity:    userClaim.Identity,
+		Path:            path,
+	}
+	// 代码运行判断
+	pb := new(models.ProblemBasic)
+	err = models.DB.Where("identity=?", problemIdentity).Preload("TestCaseBasics").First(&pb).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "未找到相应题目",
+		})
+		return
+	}
+	//  判题状态 channel阻塞
+	WA := make(chan int)
+	OOM := make(chan int)
+	CE := make(chan int)
+	passCount := 0
+	var lock sync.Mutex
+
+	// 错误提示信息
+	msg := ""
+	// 运行全部测试样例
+	for _, testCase := range pb.TestCaseBasics {
+		go func() {
+			sb.Status = 0
+			cmd := exec.Command("go", "run", path)
+			var out, stderr bytes.Buffer
+			cmd.Stderr = &stderr
+			cmd.Stdout = &out
+			stdinPipe, err := cmd.StdinPipe()
+			if err != nil {
+				fmt.Println("stdinPipe err")
+				panic(err)
+			}
+			_, err = io.WriteString(stdinPipe, testCase.Input)
+
+			// 读取运行前内存
+			var beginMem runtime.MemStats
+			runtime.ReadMemStats(&beginMem)
+
+			if err != nil {
+				fmt.Println("io.WriteString err")
+				panic(err)
+			}
+
+			if err = stdinPipe.Close(); err != nil {
+				fmt.Println("close stdinPipe err")
+			}
+			// 根据测试的输入案例进行运行，拿到输出结果和标准输出结果进行比对
+			if err := cmd.Run(); err != nil {
+				log.Println("stderr:", stderr.String())
+				if err.Error() == "exit status 1" {
+					msg = stderr.String()
+					CE <- 1
+					return
+				}
+			}
+
+			// 读取运行后内存
+			var endMem runtime.MemStats
+			runtime.ReadMemStats(&endMem)
+
+			// 答案错误
+			if testCase.Output != out.String() {
+				msg = " 答案错误"
+				WA <- 1
+				return
+			}
+
+			// 超出内存限制
+			if (endMem.Alloc/1024)-(beginMem.Alloc/1024) > uint64(pb.MaxMem) {
+				msg = "超出内存限制"
+				OOM <- 1
+				return
+			}
+			lock.Lock()
+			passCount++
+			lock.Unlock()
+			// 到这里就算通过
+		}()
+	}
+	// 阻塞判断
+	// [0-待判断 1-答案正确 2-答案错误 3-超出时间限制 4-超出内存限制 5-编译错误]
+	select {
+	case <-WA:
+		sb.Status = 2
+	case <-OOM:
+		sb.Status = 4
+	case <-CE:
+		sb.Status = 5
+	case <-time.After(time.Millisecond * time.Duration(pb.MaxRuntime)):
+		if passCount != 0 && passCount == len(pb.TestCaseBasics) {
+			sb.Status = 1
+		} else {
+			msg = "超出时间限制"
+			sb.Status = 3
+		}
+	}
+
+	// 创建提交记录
+	err = models.DB.Create(sb).Error
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "submit error: " + err.Error(),
+		})
+	}
+
+	var addPassNum int
+	if sb.Status == 1 {
+		addPassNum = 1
+	} else {
+		addPassNum = 0
+	}
+
+	err = models.DB.Model(&models.UserBasic{}).
+		Where("identity = ?", userClaim.Identity).
+		Updates(map[string]interface{}{
+			"submit_num": gorm.Expr("submit_num + ?", 1),
+			"pass_num":   gorm.Expr("pass_num + ?", addPassNum),
+		}).Error
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "submit error: " + err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
+		"data": gin.H{
+			"status": sb.Status,
+			"msg":    msg,
+		},
+		"message": "success",
+	})
 }

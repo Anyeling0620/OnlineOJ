@@ -228,7 +228,7 @@ paths:
         name: content
         required: true
         type: string
-      - description: 最大运行时间(s)
+      - description: 最大运行时间(ms)
         in: formData
         name: max_runtime
         required: true
@@ -303,7 +303,7 @@ paths:
         name: content
         required: true
         type: string
-      - description: 最大运行时间(s)
+      - description: 最大运行时间(ms)
         in: formData
         name: max_runtime
         required: true
@@ -489,6 +489,53 @@ paths:
       summary: 提交列表
       tags:
       - 公共方法
+  /user/submit:
+    post:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: problem_identity
+        in: query
+        name: problem_identity
+        required: true
+        type: string
+      - description: 内容
+        in: body
+        name: code
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 成功返回问题详情
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 代码提交
+      tags:
+      - 用户私有方法
   /users/code:
     post:
       parameters:
