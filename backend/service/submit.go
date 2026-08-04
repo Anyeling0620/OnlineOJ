@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/Anyeling0620/OnlineOJ/backend/define"
 	"github.com/Anyeling0620/OnlineOJ/backend/models"
+	"github.com/Anyeling0620/OnlineOJ/backend/util"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -89,4 +91,44 @@ func GetSubmitList(c *gin.Context) {
 		"data":    gin.H{"count": count, "list": list},
 		"message": "success",
 	})
+}
+
+// Submit
+// @Tags 用户私有方法
+// @Summary 代码提交
+// @Param Authorization header string true "Authorization"
+// @Param problem_identity query string true "problem_identity"
+// @Param code body string true "内容"
+// @Success 200 {object} SuccessResponse "成功返回问题详情"
+// @Failure 400 {object} FailResponse "请求参数错误"
+// @Failure 401 {object} FailResponse "未授权"
+// @Failure 403 {object} FailResponse "权限不足"
+// @Failure 404 {object} FailResponse "资源不存在"
+// @Failure 500 {object} FailResponse "服务器内部错误"
+// @Router /admin/problems [post] {}
+func Submit(c *gin.Context) {
+	problemIdentity := c.DefaultQuery("problem_identity", "")
+	code, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "代码不能为空",
+		})
+		return
+	}
+
+	// 代码保存
+	path, err := util.CodeSave(code)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadGateway,
+			"message": "代码保存失败: " + err.Error(),
+		})
+	}
+
+	// 代码提交
+	//sb := &models.SubmitBasic{
+	//	Identity:        util.GetUUID(),
+	//	ProblemIdentity: problemIdentity,
+	//}
 }

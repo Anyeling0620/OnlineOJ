@@ -42,5 +42,11 @@ func Router() *gin.Engine {
 		authAdmin.POST("/problems", service.ProblemCreate)
 		authAdmin.PUT("/problems", service.ProblemModify)
 	}
+
+	// 用户私有方法
+	authUser := r.Group("/user", middlewares.AuthUserCheck())
+	{
+		authUser.POST("/submit", service.Submit)
+	}
 	return r
 }
