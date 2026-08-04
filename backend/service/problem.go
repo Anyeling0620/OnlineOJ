@@ -134,7 +134,7 @@ func GetProblemDetail(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /problems [post] {}
+// @Router /admin/problems [post] {}
 func ProblemCreate(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
@@ -233,4 +233,133 @@ func ProblemCreate(c *gin.Context) {
 		},
 		"message": "success",
 	})
+}
+
+// ProblemModify
+// @Tags 管理员私有方法
+// @Summary 问题修改
+// @Param Authorization header string true "Authorization"
+// @Param identity formData string true "identity"
+// @Param title formData string true "标题"
+// @Param content formData string true "内容"
+// @Param max_runtime formData string true "最大运行时间(s)"
+// @Param max_mem formData string true "最大运行内存(kb)"
+// @Param category_ids formData []int false "分类ID数组" collectionFormat(multi)
+// @Param test_cases formData []string true "测试样例数组" collectionFormat(multi)
+// @Success 200 {object} SuccessResponse "成功返回问题详情"
+// @Failure 400 {object} FailResponse "请求参数错误"
+// @Failure 401 {object} FailResponse "未授权"
+// @Failure 403 {object} FailResponse "权限不足"
+// @Failure 404 {object} FailResponse "资源不存在"
+// @Failure 500 {object} FailResponse "服务器内部错误"
+// @Router /admin/problems [put] {}
+func ProblemModify(c *gin.Context) {
+	identity := c.PostForm("identity")
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+	maxRuntime, _ := strconv.Atoi(c.PostForm("max_runtime"))
+	maxMem, _ := strconv.Atoi(c.PostForm("max_mem"))
+	categoryIds := c.PostFormArray("category_ids")
+	testCases := c.PostFormArray("test_cases")
+	if title == "" || content == "" || len(categoryIds) <= 0 || len(testCases) <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "参数不能为空",
+		})
+		return
+	}
+
+	if err := models.DB.Transaction(func(tx *gorm.DB) error {
+		// 要么全成功 要么全不成功
+		// 问题基本信息保存
+		problemBasic := &models.ProblemBasic{
+			Identity:   identity,
+			Title:      title,
+			Content:    content,
+			MaxRuntime: maxRuntime,
+			MaxMem:     maxMem,
+		}
+		err := tx.Where("identity=?", identity).Updates(problemBasic).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		//    查询问题详情
+		err = tx.Where("identity=?", identity).Find(problemBasic).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		// 关联问题分类更新
+		// 1. 删除已存在的关联关系
+		err = tx.Where("problem_id=?", problemBasic.ID).Delete(&models.ProblemCategory{}).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		// 2. 新增新的关联关系
+		pcs := make([]*models.ProblemCategory, 0)
+		for _, id := range categoryIds {
+			intId, err := strconv.Atoi(id)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			pcs = append(pcs, &models.ProblemCategory{
+				ProblemID:  problemBasic.ID,
+				CategoryID: uint(intId),
+			})
+		}
+		err = tx.Create(&pcs).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		// 关联测试样例更新
+		// 1. 删除已存在的关联关系
+		err = tx.Where("problem_identity=?", identity).Delete(&models.TestCaseBasic{}).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		// 2. 增加新的关联关系
+		tcs := make([]*models.TestCaseBasic, 0)
+		for _, testCase := range testCases {
+			caseMap := make(map[string]string)
+			err = json.Unmarshal([]byte(testCase), &caseMap)
+			if err != nil {
+				fmt.Println(err)
+				return err
+			}
+			if _, ok := caseMap["input"]; !ok {
+				return errors.New("测试案例input格式错误")
+			}
+			if _, ok := caseMap["output"]; !ok {
+				return errors.New("测试案例output格式错误")
+			}
+			tcs = append(tcs, &models.TestCaseBasic{
+				Identity:        util.GetUUID(),
+				ProblemIdentity: identity,
+				Input:           caseMap["input"],
+				Output:          caseMap["output"],
+			})
+		}
+		err = tx.Create(&tcs).Error
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		return nil
+	}); err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "problem modify error" + err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "success",
+	})
+
 }

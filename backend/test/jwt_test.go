@@ -16,8 +16,8 @@ var key = []byte("1145141919810")
 
 func TestGenerateToken(t *testing.T) {
 	UserClaim := &UserClaims{
-		"test",
-		"e47c08df-284e-4473-b16c-70f2f56ac3f9",
+		"test2",
+		"c4d038b4bed09fdb1471ef51ec3a32cd",
 		jwt.StandardClaims{},
 	}
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaim)

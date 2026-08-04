@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"time"
 )
 
 type UserClaims struct {
@@ -17,10 +18,15 @@ var key = []byte("1145141919810")
 
 // GenerateToken 生成token
 func GenerateToken(identity, name string, isAdmin int) (string, error) {
+	now := time.Now()
 	userClaim := &UserClaims{
 		Name:     name,
 		Identity: identity,
 		IsAdmin:  isAdmin,
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt:  now.Unix(),
+			ExpiresAt: now.Add(10 * time.Minute).Unix(),
+		},
 	}
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, userClaim)
 	signedToken, err := unsignedToken.SignedString([]byte(key))
@@ -42,6 +48,11 @@ func AnalyseToken(signedToken string) (*UserClaims, error) {
 		return key, nil
 	})
 	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	if userClaim.ExpiresAt == 0 {
+		err := errors.New("token expiration is missing")
 		fmt.Println(err)
 		return nil, err
 	}

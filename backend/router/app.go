@@ -38,11 +38,9 @@ func Router() *gin.Engine {
 		authAdmin.POST("/categories", service.CategoryCreate)
 		authAdmin.PUT("/categories", service.CategoryModify)
 		authAdmin.DELETE("/categories", service.CategoryDelete)
+
+		authAdmin.POST("/problems", service.ProblemCreate)
+		authAdmin.PUT("/problems", service.ProblemModify)
 	}
-	r.POST("/problems", middlewares.AuthAdminCheck(), service.ProblemCreate)
-	//r.GET("/categories", middlewares.AuthAdminCheck(), service.GetCategoryList)
-	//r.POST("/categories", middlewares.AuthAdminCheck(), service.CategoryCreate)
-	//r.PUT("/categories", middlewares.AuthAdminCheck(), service.CategoryModify)
-	//r.DELETE("/categories", middlewares.AuthAdminCheck(), service.CategoryDelete)
 	return r
 }

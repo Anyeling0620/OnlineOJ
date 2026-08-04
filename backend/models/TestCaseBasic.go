@@ -3,7 +3,7 @@ package models
 type TestCaseBasic struct {
 	BaseModel
 	Identity        string `json:"identity"`
-	ProblemIdentity string `json:"problem-identity"`
+	ProblemIdentity string `json:"problem_identity"`
 	Input           string `json:"input"`
 	Output          string `json:"output"`
 }
