@@ -26,7 +26,7 @@ import (
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /problems/list [get] {}
+// @Router /problems [get] {}
 func GetProblemList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
 	if err != nil {
@@ -37,6 +37,7 @@ func GetProblemList(c *gin.Context) {
 		})
 		return
 	}
+	page = max(page, 0)
 	size, err := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
 	if err != nil {
 		fmt.Println("size conv error:", err)
@@ -46,6 +47,7 @@ func GetProblemList(c *gin.Context) {
 		})
 		return
 	}
+	size = max(size, 1)
 	keyword := c.DefaultQuery("keyword", "")
 
 	categoryIdentity := c.DefaultQuery("category_identity", "")
@@ -78,16 +80,16 @@ func GetProblemList(c *gin.Context) {
 // GetProblemDetail
 // @Tags 公共方法
 // @Summary 问题详情
-// @Param problem_identity query string false "问题唯一id"
+// @Param problemIdentity path string true "问题唯一标识"
 // @Success 200 {object} SuccessResponse "成功返回问题详情"
 // @Failure 400 {object} FailResponse "请求参数错误"
 // @Failure 401 {object} FailResponse "未授权"
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /problems/detail [get] {}
+// @Router /problems/{problemIdentity} [get]
 func GetProblemDetail(c *gin.Context) {
-	identity := c.Query("problem_identity")
+	identity := c.Param("problemIdentity")
 	if identity == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    -1,
@@ -134,7 +136,7 @@ func GetProblemDetail(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/problems [post] {}
+// @Router /problems [post] {}
 func ProblemCreate(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
@@ -239,7 +241,7 @@ func ProblemCreate(c *gin.Context) {
 // @Tags 管理员私有方法
 // @Summary 问题修改
 // @Param Authorization header string true "Authorization"
-// @Param identity formData string true "identity"
+// @Param problemIdentity path string true "问题唯一标识"
 // @Param title formData string true "标题"
 // @Param content formData string true "内容"
 // @Param max_runtime formData string true "最大运行时间(ms)"
@@ -252,9 +254,9 @@ func ProblemCreate(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/problems [put] {}
+// @Router /problems/{problemIdentity} [put]
 func ProblemModify(c *gin.Context) {
-	identity := c.PostForm("identity")
+	identity := c.Param("problemIdentity")
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 	maxRuntime, _ := strconv.Atoi(c.PostForm("max_runtime"))

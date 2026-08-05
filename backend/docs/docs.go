@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/categories": {
+        "/categories": {
             "get": {
                 "tags": [
                     "管理员私有方法"
@@ -51,79 +51,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "成功返回列表数据",
-                        "schema": {
-                            "$ref": "#/definitions/service.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "权限不足",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "资源不存在",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "管理员私有方法"
-                ],
-                "summary": "分类修改",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "identity",
-                        "name": "identity",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "parent_id",
-                        "name": "parent_id",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回问题详情",
                         "schema": {
                             "$ref": "#/definitions/service.SuccessResponse"
                         }
@@ -225,6 +152,81 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/categories/{categoryIdentity}": {
+            "put": {
+                "tags": [
+                    "管理员私有方法"
+                ],
+                "summary": "分类修改",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "问题唯一标识",
+                        "name": "categoryIdentity",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "parent_id",
+                        "name": "parent_id",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回问题详情",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
             },
             "delete": {
                 "tags": [
@@ -241,9 +243,9 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "identity",
-                        "name": "identity",
-                        "in": "query",
+                        "description": "分类唯一标识",
+                        "name": "categoryIdentity",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -287,80 +289,41 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/problems": {
-            "put": {
+        "/problems": {
+            "get": {
                 "tags": [
-                    "管理员私有方法"
+                    "公共方法"
                 ],
-                "summary": "问题修改",
+                "summary": "问题列表",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Authorization",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "type": "integer",
+                        "description": "请输入页数，默认为1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "请输入每页结果个数，默认为20",
+                        "name": "size",
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "identity",
-                        "name": "identity",
-                        "in": "formData",
-                        "required": true
+                        "description": "模糊搜索关键词",
+                        "name": "keyword",
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "标题",
-                        "name": "title",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "内容",
-                        "name": "content",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "最大运行时间(ms)",
-                        "name": "max_runtime",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "最大运行内存(kb)",
-                        "name": "max_mem",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        },
-                        "collectionFormat": "multi",
-                        "description": "分类ID数组",
-                        "name": "category_ids",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "multi",
-                        "description": "测试样例数组",
-                        "name": "test_cases",
-                        "in": "formData",
-                        "required": true
+                        "description": "分类唯一id",
+                        "name": "category_identity",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功返回问题详情",
+                        "description": "成功返回列表数据",
                         "schema": {
                             "$ref": "#/definitions/service.SuccessResponse"
                         }
@@ -500,7 +463,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/problems/detail": {
+        "/problems/{problemIdentity}": {
             "get": {
                 "tags": [
                     "公共方法"
@@ -509,9 +472,119 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "问题唯一id",
-                        "name": "problem_identity",
-                        "in": "query"
+                        "description": "问题唯一标识",
+                        "name": "problemIdentity",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回问题详情",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "管理员私有方法"
+                ],
+                "summary": "问题修改",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "问题唯一标识",
+                        "name": "problemIdentity",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "标题",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "内容",
+                        "name": "content",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "最大运行时间(ms)",
+                        "name": "max_runtime",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "最大运行内存(kb)",
+                        "name": "max_mem",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "分类ID数组",
+                        "name": "category_ids",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "测试样例数组",
+                        "name": "test_cases",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -554,79 +627,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/problems/list": {
-            "get": {
-                "tags": [
-                    "公共方法"
-                ],
-                "summary": "问题列表",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "请输入页数，默认为1",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "请输入每页结果个数，默认为20",
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "模糊搜索关键词",
-                        "name": "keyword",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "分类唯一id",
-                        "name": "category_identity",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回列表数据",
-                        "schema": {
-                            "$ref": "#/definitions/service.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "权限不足",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "资源不存在",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/submit/list": {
+        "/submissions": {
             "get": {
                 "tags": [
                     "公共方法"
@@ -648,14 +649,16 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "问题唯一id",
-                        "name": "problem_identity",
-                        "in": "query"
+                        "name": "problemIdentity",
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "description": "用户唯一id",
-                        "name": "user_identity",
-                        "in": "query"
+                        "name": "userIdentity",
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
@@ -702,9 +705,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/user/submit": {
+            },
             "post": {
                 "tags": [
                     "用户私有方法"
@@ -720,8 +721,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "problem_identity",
-                        "name": "problem_identity",
+                        "description": "problemUdentity",
+                        "name": "problemIdentity",
                         "in": "query",
                         "required": true
                     },
@@ -788,60 +789,6 @@ const docTemplate = `{
                         "name": "mail",
                         "in": "formData",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回列表数据",
-                        "schema": {
-                            "$ref": "#/definitions/service.SuccessResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "权限不足",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "资源不存在",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/service.FailResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/detail": {
-            "get": {
-                "tags": [
-                    "公共方法"
-                ],
-                "summary": "用户详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "用户唯一id",
-                        "name": "identity",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1043,6 +990,61 @@ const docTemplate = `{
                         "description": "code",
                         "name": "code",
                         "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回列表数据",
+                        "schema": {
+                            "$ref": "#/definitions/service.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "权限不足",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "资源不存在",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/service.FailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userIdentity}": {
+            "get": {
+                "tags": [
+                    "公共方法"
+                ],
+                "summary": "用户详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户唯一标识",
+                        "name": "userIdentity",
+                        "in": "path",
                         "required": true
                     }
                 ],

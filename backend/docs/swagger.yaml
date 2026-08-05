@@ -29,47 +29,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /admin/categories:
-    delete:
-      parameters:
-      - description: Authorization
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: identity
-        in: query
-        name: identity
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 成功返回问题详情
-          schema:
-            $ref: '#/definitions/service.SuccessResponse'
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "404":
-          description: 资源不存在
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-      summary: 分类删除
-      tags:
-      - 管理员私有方法
+  /categories:
     get:
       parameters:
       - description: 请输入页数，默认为1
@@ -161,6 +121,47 @@ paths:
       summary: 分类创建
       tags:
       - 管理员私有方法
+  /categories/{categoryIdentity}:
+    delete:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分类唯一标识
+        in: path
+        name: categoryIdentity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功返回问题详情
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 分类删除
+      tags:
+      - 管理员私有方法
     put:
       parameters:
       - description: Authorization
@@ -168,9 +169,9 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: identity
-        in: formData
-        name: identity
+      - description: 问题唯一标识
+        in: path
+        name: categoryIdentity
         required: true
         type: string
       - description: name
@@ -210,7 +211,53 @@ paths:
       summary: 分类修改
       tags:
       - 管理员私有方法
-  /admin/problems:
+  /problems:
+    get:
+      parameters:
+      - description: 请输入页数，默认为1
+        in: query
+        name: page
+        type: integer
+      - description: 请输入每页结果个数，默认为20
+        in: query
+        name: size
+        type: integer
+      - description: 模糊搜索关键词
+        in: query
+        name: keyword
+        type: string
+      - description: 分类唯一id
+        in: query
+        name: category_identity
+        type: string
+      responses:
+        "200":
+          description: 成功返回列表数据
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 问题列表
+      tags:
+      - 公共方法
     post:
       parameters:
       - description: Authorization
@@ -281,6 +328,42 @@ paths:
       summary: 问题创建
       tags:
       - 管理员私有方法
+  /problems/{problemIdentity}:
+    get:
+      parameters:
+      - description: 问题唯一标识
+        in: path
+        name: problemIdentity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功返回问题详情
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 问题详情
+      tags:
+      - 公共方法
     put:
       parameters:
       - description: Authorization
@@ -288,9 +371,9 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: identity
-        in: formData
-        name: identity
+      - description: 问题唯一标识
+        in: path
+        name: problemIdentity
         required: true
         type: string
       - description: 标题
@@ -356,89 +439,7 @@ paths:
       summary: 问题修改
       tags:
       - 管理员私有方法
-  /problems/detail:
-    get:
-      parameters:
-      - description: 问题唯一id
-        in: query
-        name: problem_identity
-        type: string
-      responses:
-        "200":
-          description: 成功返回问题详情
-          schema:
-            $ref: '#/definitions/service.SuccessResponse'
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "404":
-          description: 资源不存在
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-      summary: 问题详情
-      tags:
-      - 公共方法
-  /problems/list:
-    get:
-      parameters:
-      - description: 请输入页数，默认为1
-        in: query
-        name: page
-        type: integer
-      - description: 请输入每页结果个数，默认为20
-        in: query
-        name: size
-        type: integer
-      - description: 模糊搜索关键词
-        in: query
-        name: keyword
-        type: string
-      - description: 分类唯一id
-        in: query
-        name: category_identity
-        type: string
-      responses:
-        "200":
-          description: 成功返回列表数据
-          schema:
-            $ref: '#/definitions/service.SuccessResponse'
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "404":
-          description: 资源不存在
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-      summary: 问题列表
-      tags:
-      - 公共方法
-  /submit/list:
+  /submissions:
     get:
       parameters:
       - description: 请输入页数，默认为1
@@ -451,11 +452,13 @@ paths:
         type: integer
       - description: 问题唯一id
         in: query
-        name: problem_identity
+        name: problemIdentity
+        required: true
         type: string
       - description: 用户唯一id
         in: query
-        name: user_identity
+        name: userIdentity
+        required: true
         type: string
       - description: 状态
         in: query
@@ -489,7 +492,6 @@ paths:
       summary: 提交列表
       tags:
       - 公共方法
-  /user/submit:
     post:
       parameters:
       - description: Authorization
@@ -497,9 +499,9 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: problem_identity
+      - description: problemUdentity
         in: query
-        name: problem_identity
+        name: problemIdentity
         required: true
         type: string
       - description: 内容
@@ -536,6 +538,42 @@ paths:
       summary: 代码提交
       tags:
       - 用户私有方法
+  /users/{userIdentity}:
+    get:
+      parameters:
+      - description: 用户唯一标识
+        in: path
+        name: userIdentity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功返回列表数据
+          schema:
+            $ref: '#/definitions/service.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "404":
+          description: 资源不存在
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/service.FailResponse'
+      summary: 用户详情
+      tags:
+      - 公共方法
   /users/code:
     post:
       parameters:
@@ -570,41 +608,6 @@ paths:
           schema:
             $ref: '#/definitions/service.FailResponse'
       summary: 验证码发送
-      tags:
-      - 公共方法
-  /users/detail:
-    get:
-      parameters:
-      - description: 用户唯一id
-        in: query
-        name: identity
-        type: string
-      responses:
-        "200":
-          description: 成功返回列表数据
-          schema:
-            $ref: '#/definitions/service.SuccessResponse'
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "403":
-          description: 权限不足
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "404":
-          description: 资源不存在
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/service.FailResponse'
-      summary: 用户详情
       tags:
       - 公共方法
   /users/login:

@@ -24,7 +24,7 @@ import (
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/categories [get] {}
+// @Router /categories [get] {}
 func GetCategoryList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
 	if err != nil {
@@ -35,6 +35,7 @@ func GetCategoryList(c *gin.Context) {
 		})
 		return
 	}
+	page = max(page, 1)
 	size, err := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
 	if err != nil {
 		fmt.Println("size conv error:", err)
@@ -44,6 +45,7 @@ func GetCategoryList(c *gin.Context) {
 		})
 		return
 	}
+	size = max(size, 1)
 	keyword := c.DefaultQuery("keyword", "")
 
 	var count int64
@@ -78,7 +80,7 @@ func GetCategoryList(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/categories [post] {}
+// @Router /categories [post] {}
 func CategoryCreate(c *gin.Context) {
 	name := c.PostForm("name")
 	if len(name) == 0 {
@@ -120,7 +122,7 @@ func CategoryCreate(c *gin.Context) {
 // @Tags 管理员私有方法
 // @Summary 分类修改
 // @Param Authorization header string true "Authorization"
-// @Param identity formData string true "identity"
+// @Param categoryIdentity path string true "问题唯一标识"
 // @Param name formData string true "name"
 // @Param parent_id formData string false "parent_id"
 // @Success 200 {object} SuccessResponse "成功返回问题详情"
@@ -129,9 +131,9 @@ func CategoryCreate(c *gin.Context) {
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/categories [put] {}
+// @Router /categories/{categoryIdentity} [put]
 func CategoryModify(c *gin.Context) {
-	identity := c.PostForm("identity")
+	identity := c.Param("categoryIdentity")
 	if len(identity) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
@@ -166,6 +168,7 @@ func CategoryModify(c *gin.Context) {
 			"code":    http.StatusBadGateway,
 			"message": "分类修改失败",
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -178,16 +181,16 @@ func CategoryModify(c *gin.Context) {
 // @Tags 管理员私有方法
 // @Summary 分类删除
 // @Param Authorization header string true "Authorization"
-// @Param identity query string true "identity"
+// @Param categoryIdentity path string true "分类唯一标识"
 // @Success 200 {object} SuccessResponse "成功返回问题详情"
 // @Failure 400 {object} FailResponse "请求参数错误"
 // @Failure 401 {object} FailResponse "未授权"
 // @Failure 403 {object} FailResponse "权限不足"
 // @Failure 404 {object} FailResponse "资源不存在"
 // @Failure 500 {object} FailResponse "服务器内部错误"
-// @Router /admin/categories [delete] {}
+// @Router /categories/{categoryIdentity} [delete]
 func CategoryDelete(c *gin.Context) {
-	identity := c.Query("identity")
+	identity := c.Param("categoryIdentity")
 	if len(identity) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,

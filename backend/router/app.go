@@ -17,11 +17,11 @@ func Router() *gin.Engine {
 	r.GET("/ping", service.Ping)
 
 	// 问题
-	r.GET("/problems/list", service.GetProblemList)
-	r.GET("/problems/detail", service.GetProblemDetail)
+	r.GET("/problems", service.GetProblemList)
+	r.GET("/problems/:problemIdentity", service.GetProblemDetail)
 
 	// 用户
-	r.GET("/users/detail", service.GetUserDetail)
+	r.GET("/users/:userIdentity", service.GetUserDetail)
 	r.POST("/users/login", service.Login)
 	r.POST("/users/register", service.Register)
 	r.POST("/users/code", service.SendCode)
@@ -29,24 +29,21 @@ func Router() *gin.Engine {
 	r.GET("/users/rank", service.GetRankList)
 
 	// 提交记录
-	r.GET("/submit/list", service.GetSubmitList)
+	r.GET("/submissions", service.GetSubmitList)
 
 	//管理员私有
-	authAdmin := r.Group("/admin", middlewares.AuthAdminCheck())
-	{
-		authAdmin.GET("/categories", service.GetCategoryList)
-		authAdmin.POST("/categories", service.CategoryCreate)
-		authAdmin.PUT("/categories", service.CategoryModify)
-		authAdmin.DELETE("/categories", service.CategoryDelete)
 
-		authAdmin.POST("/problems", service.ProblemCreate)
-		authAdmin.PUT("/problems", service.ProblemModify)
-	}
+	r.GET("/categories", middlewares.AuthAdminCheck(), service.GetCategoryList)
+	r.POST("/categories", middlewares.AuthAdminCheck(), service.CategoryCreate)
+	r.PUT("/categories/:categoryIdentity", middlewares.AuthAdminCheck(), service.CategoryModify)
+	r.DELETE("/categories/:categoryIdentity", middlewares.AuthAdminCheck(), service.CategoryDelete)
+
+	r.POST("/problems", middlewares.AuthAdminCheck(), service.ProblemCreate)
+	r.PUT("/problems/:problemIdentity", middlewares.AuthAdminCheck(), service.ProblemModify)
 
 	// 用户私有方法
-	authUser := r.Group("/user", middlewares.AuthUserCheck())
-	{
-		authUser.POST("/submit", service.Submit)
-	}
+
+	r.POST("/submissions", middlewares.AuthUserCheck(), service.Submit)
+
 	return r
 }
